@@ -1,0 +1,6 @@
+[user]
+	useConfigOnly = true
+
+[includeIf "gitdir:~/src/github.com/pedropb/"]
+	path = ~/.config/git/personal
+
