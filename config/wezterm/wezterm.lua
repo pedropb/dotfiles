@@ -7,7 +7,9 @@ config.font = wezterm.font_with_fallback({ "JetBrains Mono", "Symbols Nerd Font 
 config.font_size = 15.0
 config.line_height = 1.1
 config.window_background_opacity = 0.93
-config.macos_window_background_blur = 20
+if wezterm.target_triple:find("apple") then
+  config.macos_window_background_blur = 20
+end
 config.window_decorations = "RESIZE"
 config.window_padding = { left = 14, right = 14, top = 12, bottom = 12 }
 config.inactive_pane_hsb = { saturation = 0.85, brightness = 0.72 }

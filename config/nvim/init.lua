@@ -275,7 +275,7 @@ vim.keymap.set("n", "<leader>gL", function()
 
 	local url = string.format("%s/commit/%s", remote, commit)
 	vim.fn.setreg("+", url)
-	vim.fn.system(string.format("open '%s'", url))
+	vim.ui.open(url)
 	vim.notify("Opened: " .. url)
 end, { desc = "[G]it [L]ink (blame commit)" })
 
