@@ -39,9 +39,8 @@ current Nix system automatically and supports Linux and macOS on both x86_64 and
 ARM64. For Windows, install and activate it inside a WSL 2 distribution; native
 Windows is not a Home Manager target.
 
-The profile uses the invoking user's `USER` and `HOME`. First activation installs
-the declared packages (`just`, `neovim`, `starship`, and `tmux`) and backs up
-conflicting managed files as `*.before-home-manager`.
+The profile uses the invoking user's `USER` and `HOME`. Its package inventory is
+defined in [`home/packages.nix`](home/packages.nix).
 
 ```sh
 nix run --impure .#home-manager -- switch --impure -b before-home-manager --flake .#default

@@ -45,12 +45,7 @@ in
   home.stateVersion = "24.11";
 
   # Keep WezTerm's GUI installation independent; Nix manages its configuration.
-  home.packages = with pkgs; [
-    just
-    neovim
-    shadowenv
-    tmux
-  ];
+  home.packages = import ./packages.nix { inherit pkgs; };
 
   home.file = {
     ".tmux.conf".source = ../config/tmux/tmux.conf;
