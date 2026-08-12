@@ -3,7 +3,7 @@
 
 [credential "https://github.com"]
 	helper = 
-	helper = !/usr/bin/gh auth git-credential
+	helper = !gh auth git-credential
 
 [includeIf "gitdir:~/src/github.com/pedropb/"]
 	path = ~/.config/git/personal
