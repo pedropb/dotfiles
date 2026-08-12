@@ -1,4 +1,0 @@
-# Starship owns the interactive prompt.
-if [[ -o interactive ]] && (( $+commands[starship] )); then
-  eval "$(starship init zsh)"
-fi

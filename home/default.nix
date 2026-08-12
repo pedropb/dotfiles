@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ pkgs, lib, ... }:
 let
   username = builtins.getEnv "USER";
   homeDirectory = builtins.getEnv "HOME";
@@ -19,15 +19,41 @@ in
   home.packages = with pkgs; [
     just
     neovim
-    starship
     tmux
   ];
 
   home.file = {
-    ".zprofile".source = ../shell/zprofile;
-    ".zshrc".source = ../shell/zshrc;
     ".tmux.conf".source = ../config/tmux/tmux.conf;
     ".gitconfig".source = ../config/git/config;
+  };
+
+  programs = {
+    starship = {
+      enable = true;
+      enableZshIntegration = true;
+    };
+
+    zsh = {
+      enable = true;
+      dotDir = homeDirectory;
+      enableCompletion = true;
+      autosuggestion.enable = true;
+      syntaxHighlighting.enable = true;
+
+      oh-my-zsh = {
+        enable = true;
+        plugins = [ "git" ];
+      };
+
+      profileExtra = ''
+        export PATH="$HOME/.nix-profile/bin:$PATH:$HOME/.local/bin"
+        export BAT_THEME="TwoDark"
+      '';
+
+      initContent = lib.mkOrder 900 ''
+        source ${pkgs.zsh-you-should-use}/share/zsh/plugins/you-should-use/you-should-use.plugin.zsh
+      '';
+    };
   };
 
   xdg.enable = true;

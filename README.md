@@ -5,7 +5,8 @@ Portable Home Manager configuration for macOS.
 ## Managed configuration
 
 - Git: `~/.gitconfig` with an automatic personal identity
-- Zsh: `.zshrc`, `.zprofile`
+- Zsh: Home Manager-generated `.zshrc` and `.zprofile`, with Oh My Zsh's `git`
+  aliases, autosuggestions, `you-should-use`, and syntax highlighting
 - Starship: `~/.config/starship.toml`
 - WezTerm: `~/.config/wezterm/wezterm.lua`
 - Neovim: `~/.config/nvim/init.lua`
