@@ -11,7 +11,8 @@ Portable Home Manager configuration for macOS and Linux, including Linux distrib
 - Starship: `~/.config/starship.toml`
 - WezTerm: `~/.config/wezterm/wezterm.lua`
 - Neovim: `~/.config/nvim/init.lua`
-- tmux: `~/.tmux.conf`
+- tmux: `~/.config/tmux/tmux.conf` (the XDG path, read by tmux 3.1+). A
+  host-provided tmux config is sourced first, then overridden here.
 
 Private path-specific Git identities belong in the ignored `home/local.nix`. It
 can add `dotfiles.git.conditionalIdentities.<key>` with `gitdir`, `name`, and

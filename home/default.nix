@@ -50,7 +50,6 @@ in
   home.packages = import ./packages.nix { inherit pkgs; };
 
   home.file = {
-    ".tmux.conf".source = ../config/tmux/tmux.conf;
     ".gitconfig".source = ../config/git/config;
   };
 
@@ -86,6 +85,7 @@ in
   xdg.enable = true;
   xdg.configFile = {
     "nvim/init.lua".source = ../config/nvim/init.lua;
+    "tmux/tmux.conf".source = ../config/tmux/tmux.conf;
     "starship.toml".source = ../config/starship/starship.toml;
     "git/local".text = lib.concatStringsSep "\n" (lib.mapAttrsToList (name: identity: ''
       [includeIf "gitdir:${identity.gitdir}"]
