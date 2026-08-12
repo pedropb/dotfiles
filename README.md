@@ -5,12 +5,29 @@ Portable Home Manager configuration for macOS and Linux, including Linux distrib
 ## Managed configuration
 
 - Git: `~/.gitconfig` with an automatic personal identity
+
 - Zsh: Home Manager-generated `.zshrc` and `.zprofile`, with Oh My Zsh's `git`
   aliases, autosuggestions, `you-should-use`, and syntax highlighting
 - Starship: `~/.config/starship.toml`
 - WezTerm: `~/.config/wezterm/wezterm.lua`
 - Neovim: `~/.config/nvim/init.lua`
 - tmux: `~/.tmux.conf`
+
+Private path-specific Git identities belong in the ignored `home/local.nix`. It
+can add `dotfiles.git.conditionalIdentities.<key>` with `gitdir`, `name`, and
+`email`; activation writes the matching identity to `~/.config/git/identities`
+and includes it only for that Git directory prefix.
+
+```nix
+{ ... }:
+{
+  dotfiles.git.conditionalIdentities.example = {
+    gitdir = "~/src/example.com/";
+    name = "Example Author";
+    email = "author@example.com";
+  };
+}
+```
 
 The repository is the source of truth. Edit files here, then activate the profile;
 do not edit the managed files in `$HOME`.
