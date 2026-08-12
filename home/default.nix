@@ -43,6 +43,8 @@ in
 
 
   home.stateVersion = "24.11";
+  home.sessionVariables.EDITOR = "nvim";
+
 
   # Keep WezTerm's GUI installation independent; Nix manages its configuration.
   home.packages = import ./packages.nix { inherit pkgs; };
@@ -73,7 +75,6 @@ in
       profileExtra = ''
         export PATH="$HOME/.nix-profile/bin:$PATH:$HOME/.local/bin"
         export BAT_THEME="TwoDark"
-        export EDITOR=nvim
       '';
 
       initContent = lib.mkOrder 900 ''
