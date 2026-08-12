@@ -2,6 +2,12 @@ local wezterm = require("wezterm")
 local act = wezterm.action
 local config = {}
 
+-- WezTerm resolves the shell from the password database and deliberately
+-- ignores $SHELL, so no session-level override can reach it. Name zsh here
+-- rather than depend on `chsh`; `-l` keeps it a login shell, as WezTerm's own
+-- default does.
+config.default_prog = { "/bin/zsh", "-l" }
+
 config.color_scheme = "Catppuccin Mocha"
 config.font = wezterm.font_with_fallback({ "JetBrains Mono", "Symbols Nerd Font Mono" })
 config.font_size = 15.0
