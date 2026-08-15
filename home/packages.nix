@@ -11,5 +11,7 @@ with pkgs; [
   clippy
   neovim
   lazygit
+  glab
   tmux
+  (pkgs.callPackage ./omp.nix { })
 ]
