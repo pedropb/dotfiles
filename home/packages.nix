@@ -7,6 +7,7 @@ with pkgs; [
   rustc
   rust-analyzer
   rustfmt
+  lua
   clippy
   neovim
   lazygit
