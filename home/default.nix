@@ -87,6 +87,7 @@ in
     "nvim/init.lua".source = ../config/nvim/init.lua;
     "tmux/tmux.conf".source = ../config/tmux/tmux.conf;
     "starship.toml".source = ../config/starship/starship.toml;
+    "stylua/stylua.toml".source = ../config/stylua/stylua.toml;
     "git/local".text = lib.concatStringsSep "\n" (lib.mapAttrsToList (name: identity: ''
       [includeIf "gitdir:${identity.gitdir}"]
         path = ~/.config/git/identities/${name}

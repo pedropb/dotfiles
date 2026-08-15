@@ -42,10 +42,18 @@ config.keys = {
   -- Preserve Ctrl-b for readline/zsh when it is pressed twice.
   { key = "b", mods = "LEADER", action = act.SendKey({ key = "b", mods = "CTRL" }) },
 
+  -- macOS-style command shortcuts; send portable readline/zsh controls.
+  { key = "LeftArrow", mods = "CMD", action = act.SendKey({ key = "a", mods = "CTRL" }) },
+  { key = "RightArrow", mods = "CMD", action = act.SendKey({ key = "e", mods = "CTRL" }) },
+  { key = "Backspace", mods = "CMD", action = act.SendKey({ key = "u", mods = "CTRL" }) },
+
   -- Pane lifecycle: Ctrl-b v makes a vertical split; Ctrl-b s makes a horizontal split.
   { key = "v", mods = "LEADER", action = act.SplitHorizontal({ domain = "CurrentPaneDomain" }) },
   { key = "s", mods = "LEADER", action = act.SplitVertical({ domain = "CurrentPaneDomain" }) },
   { key = "x", mods = "LEADER", action = act.CloseCurrentPane({ confirm = true }) },
+
+  -- Zen mode: maximize or restore the active pane.
+  { key = "z", mods = "LEADER", action = act.TogglePaneZoomState },
 
   -- Vim-style pane focus and resizing.
   { key = "h", mods = "LEADER", action = act.ActivatePaneDirection("Left") },
@@ -57,10 +65,9 @@ config.keys = {
   { key = "K", mods = "LEADER|SHIFT", action = act.AdjustPaneSize({ "Up", 5 }) },
   { key = "L", mods = "LEADER|SHIFT", action = act.AdjustPaneSize({ "Right", 5 }) },
 
-  -- Tab lifecycle and navigation.
-  { key = "t", mods = "LEADER", action = act.SpawnTab("CurrentPaneDomain") },
-  { key = "[", mods = "LEADER", action = act.ActivateTabRelative(-1) },
-  { key = "]", mods = "LEADER", action = act.ActivateTabRelative(1) },
+  -- Tab lifecycle and selection.
+  { key = "c", mods = "LEADER", action = act.SpawnTab("CurrentPaneDomain") },
+  { key = "[", mods = "LEADER", action = act.ActivateCopyMode },
   { key = "1", mods = "LEADER", action = act.ActivateTab(0) },
   { key = "2", mods = "LEADER", action = act.ActivateTab(1) },
   { key = "3", mods = "LEADER", action = act.ActivateTab(2) },
@@ -71,5 +78,12 @@ config.keys = {
   { key = "8", mods = "LEADER", action = act.ActivateTab(7) },
   { key = "9", mods = "LEADER", action = act.ActivateTab(8) },
 }
+
+-- Extend rather than replace WezTerm's built-in vi-style copy-mode bindings.
+local copy_mode = wezterm.gui.default_key_tables().copy_mode
+table.insert(copy_mode, { key = "u", mods = "NONE", action = act.CopyMode({ MoveByPage = -0.5 }) })
+table.insert(copy_mode, { key = "d", mods = "NONE", action = act.CopyMode({ MoveByPage = 0.5 }) })
+table.insert(copy_mode, { key = "/", mods = "NONE", action = act.Search({ CaseInSensitiveString = "" }) })
+config.key_tables = { copy_mode = copy_mode }
 
 return config
