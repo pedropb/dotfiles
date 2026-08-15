@@ -79,11 +79,39 @@ config.keys = {
   { key = "9", mods = "LEADER", action = act.ActivateTab(8) },
 }
 
--- Extend rather than replace WezTerm's built-in vi-style copy-mode bindings.
 local copy_mode = wezterm.gui.default_key_tables().copy_mode
 table.insert(copy_mode, { key = "u", mods = "NONE", action = act.CopyMode({ MoveByPage = -0.5 }) })
 table.insert(copy_mode, { key = "d", mods = "NONE", action = act.CopyMode({ MoveByPage = 0.5 }) })
-table.insert(copy_mode, { key = "/", mods = "NONE", action = act.Search({ CaseInSensitiveString = "" }) })
-config.key_tables = { copy_mode = copy_mode }
+table.insert(copy_mode, {
+  key = "/",
+  mods = "NONE",
+  action = act.Multiple({ act.Search({ CaseInSensitiveString = "" }), act.CopyMode("ClearPattern") }),
+})
+local function land_on_match(...)
+  local actions = { ... }
+  table.insert(actions, act.CopyMode("MoveToSelectionOtherEnd"))
+  table.insert(actions, act.CopyMode("ClearSelectionMode"))
+  return act.Multiple(actions)
+end
+
+-- Match vi: `n` searches upward and `N` downward.
+table.insert(copy_mode, { key = "n", mods = "NONE", action = land_on_match(act.CopyMode("PriorMatch")) })
+for _, mods in ipairs({ "NONE", "SHIFT" }) do
+  table.insert(copy_mode, { key = "N", mods = mods, action = land_on_match(act.CopyMode("NextMatch")) })
+end
+
+local search_mode = wezterm.gui.default_key_tables().search_mode
+table.insert(search_mode, {
+  key = "Enter",
+  mods = "NONE",
+  action = land_on_match(act.CopyMode("AcceptPattern")),
+})
+table.insert(search_mode, {
+  key = "Escape",
+  mods = "NONE",
+  action = land_on_match(act.CopyMode("ClearPattern"), act.CopyMode("AcceptPattern")),
+})
+
+config.key_tables = { copy_mode = copy_mode, search_mode = search_mode }
 
 return config
