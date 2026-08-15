@@ -52,6 +52,11 @@ in
   home.file = {
     ".gitconfig".source = ../config/git/config;
   };
+  home.activation.createPersonalGitHubDirectory =
+    lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+      $DRY_RUN_CMD mkdir -p "$HOME/src/github.com/pedropb"
+    '';
+
 
   programs = {
     starship = {
@@ -78,6 +83,7 @@ in
 
       initContent = lib.mkOrder 900 ''
         source ${pkgs.zsh-you-should-use}/share/zsh/plugins/you-should-use/you-should-use.plugin.zsh
+        source "$HOME/.config/zsh/scd.zsh"
       '';
     };
   };
@@ -85,6 +91,7 @@ in
   xdg.enable = true;
   xdg.configFile = {
     "nvim/init.lua".source = ../config/nvim/init.lua;
+    "zsh/scd.zsh".source = ../config/zsh/scd.zsh;
     "tmux/tmux.conf".source = ../config/tmux/tmux.conf;
     "starship.toml".source = ../config/starship/starship.toml;
     "stylua/stylua.toml".source = ../config/stylua/stylua.toml;
