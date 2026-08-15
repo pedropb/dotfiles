@@ -4,6 +4,6 @@ with pkgs; [
   bun
   nodejs
   neovim
-  shadowenv
+  lazygit
   tmux
 ]
