@@ -13,6 +13,7 @@ with pkgs; [
   clippy
   neovim
   lazygit
+  gh
   glab
   tmux
   (pkgs.callPackage ./omp.nix { })

@@ -4,30 +4,44 @@ let
   homeDirectory = builtins.getEnv "HOME";
   localModule = builtins.toPath "${homeDirectory}/src/github.com/pedropb/dotfiles/home/local.nix";
   conditionalIdentities = config.dotfiles.git.conditionalIdentities;
+  credentialHelpers = config.dotfiles.git.credentialHelpers;
 in
 {
 
   imports = lib.optional (builtins.pathExists localModule) localModule;
 
-  options.dotfiles.git.conditionalIdentities = lib.mkOption {
-    type = lib.types.attrsOf (lib.types.submodule {
-      options = {
-        gitdir = lib.mkOption {
-          type = lib.types.str;
-          description = "Git directory prefix to match.";
+  options.dotfiles.git = {
+    conditionalIdentities = lib.mkOption {
+      type = lib.types.attrsOf (lib.types.submodule {
+        options = {
+          gitdir = lib.mkOption {
+            type = lib.types.str;
+            description = "Git directory prefix to match.";
+          };
+          name = lib.mkOption {
+            type = lib.types.str;
+            description = "Author name for matching repositories.";
+          };
+          email = lib.mkOption {
+            type = lib.types.str;
+            description = "Author email for matching repositories.";
+          };
         };
-        name = lib.mkOption {
-          type = lib.types.str;
-          description = "Author name for matching repositories.";
-        };
-        email = lib.mkOption {
-          type = lib.types.str;
-          description = "Author email for matching repositories.";
-        };
-      };
-    });
-    default = { };
-    description = "Path-specific Git author identities.";
+      });
+      default = { };
+      description = "Path-specific Git author identities.";
+    };
+
+    credentialHelpers = lib.mkOption {
+      type = lib.types.attrsOf lib.types.str;
+      default = { };
+      example = { "gitlab.example.com" = "!glab auth git-credential"; };
+      description = ''
+        Git credential helper command per HTTPS host, keyed by the host as the
+        remote URL spells it. Each entry clears the inherited helper chain for
+        that host first, so platform helpers never answer in the CLI's place.
+      '';
+    };
   };
 
   config = {
@@ -48,6 +62,10 @@ in
 
   # Keep WezTerm's GUI installation independent; Nix manages its configuration.
   home.packages = import ./packages.nix { inherit pkgs; };
+
+  # The gh CLI answers for github.com; private forges add their own helper in
+  # home/local.nix.
+  dotfiles.git.credentialHelpers."github.com" = lib.mkDefault "!gh auth git-credential";
 
   home.file = {
     ".gitconfig".source = ../config/git/config;
@@ -95,10 +113,17 @@ in
     "tmux/tmux.conf".source = ../config/tmux/tmux.conf;
     "starship.toml".source = ../config/starship/starship.toml;
     "stylua/stylua.toml".source = ../config/stylua/stylua.toml;
-    "git/local".text = lib.concatStringsSep "\n" (lib.mapAttrsToList (name: identity: ''
-      [includeIf "gitdir:${identity.gitdir}"]
-        path = ~/.config/git/identities/${name}
-    '') conditionalIdentities);
+    "git/local".text = lib.concatStringsSep "\n" (
+      lib.mapAttrsToList (host: helper: ''
+        [credential "https://${host}"]
+          helper =
+          helper = ${helper}
+      '') credentialHelpers
+      ++ lib.mapAttrsToList (name: identity: ''
+        [includeIf "gitdir:${identity.gitdir}"]
+          path = ~/.config/git/identities/${name}
+      '') conditionalIdentities
+    );
     "git/personal".source = ../config/git/personal;
     "wezterm/wezterm.lua".source = ../config/wezterm/wezterm.lua;
   } // lib.mapAttrs' (name: identity:

@@ -1,10 +1,6 @@
 [user]
 	useConfigOnly = true
 
-[credential "https://github.com"]
-	helper = 
-	helper = !gh auth git-credential
-
 [includeIf "gitdir:~/src/github.com/pedropb/"]
 	path = ~/.config/git/personal
 
