@@ -3,6 +3,8 @@ with pkgs; [
   just
   bun
   nodejs
+  go
+  gopls
   cargo
   rustc
   rust-analyzer
