@@ -126,6 +126,7 @@ in
     );
     "git/personal".source = ../config/git/personal;
     "wezterm/wezterm.lua".source = ../config/wezterm/wezterm.lua;
+    "cmux/cmux.json".source = ../config/cmux/cmux.json;
   } // lib.mapAttrs' (name: identity:
     lib.nameValuePair "git/identities/${name}" {
       text = ''
