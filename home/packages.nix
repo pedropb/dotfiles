@@ -1,5 +1,7 @@
 { pkgs }:
-with pkgs; [
+with pkgs;
+lib.optional stdenv.isDarwin flameshot
+++ [
   just
   bun
   nodejs

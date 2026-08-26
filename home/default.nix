@@ -9,7 +9,7 @@ let
 in
 {
 
-  imports = lib.optional (builtins.pathExists localModule) localModule;
+  imports = [ ./screenshot.nix ] ++ lib.optional (builtins.pathExists localModule) localModule;
 
   options.dotfiles.git = {
     conditionalIdentities = lib.mkOption {
