@@ -14,3 +14,7 @@ switch:
 # First activation preserves conflicting files as *.before-home-manager.
 bootstrap:
   nix run --impure .#home-manager -- switch --impure -b before-home-manager --flake .#default
+
+# Run cln's test suite.
+test-cln:
+  cd tools/cln && go test ./...

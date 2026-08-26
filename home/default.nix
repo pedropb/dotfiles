@@ -5,6 +5,7 @@ let
   localModule = builtins.toPath "${homeDirectory}/src/github.com/pedropb/dotfiles/home/local.nix";
   conditionalIdentities = config.dotfiles.git.conditionalIdentities;
   credentialHelpers = config.dotfiles.git.credentialHelpers;
+  clnProviders = config.dotfiles.cln.providers;
 in
 {
 
@@ -44,6 +45,45 @@ in
     };
   };
 
+  options.dotfiles.cln = {
+    defaultProvider = lib.mkOption {
+      type = lib.types.str;
+      default = "gh";
+      description = "Alias of the cln provider used when none is given explicitly.";
+    };
+
+    providers = lib.mkOption {
+      type = lib.types.attrsOf (lib.types.submodule {
+        options = {
+          type = lib.mkOption {
+            type = lib.types.enum [ "github" "gitlab" ];
+            description = "Backend cln uses to build clone URLs and list repositories.";
+          };
+          host = lib.mkOption {
+            type = lib.types.str;
+            description = ''Hostname cln clones from, e.g. "github.com".'';
+          };
+          defaultNamespace = lib.mkOption {
+            type = lib.types.nullOr lib.types.str;
+            default = null;
+            description = "Namespace used when a repository is given without one.";
+          };
+        };
+      });
+      default = { };
+      example = {
+        corp = {
+          type = "gitlab";
+          host = "git.example.com";
+        };
+      };
+      description = ''
+        cln providers, rendered to ~/.config/cln/config.toml. Add private,
+        non-public forges in the git-ignored home/local.nix instead of here.
+      '';
+    };
+  };
+
   config = {
   assertions = [
     {
@@ -66,6 +106,11 @@ in
   # The gh CLI answers for github.com; private forges add their own helper in
   # home/local.nix.
   dotfiles.git.credentialHelpers."github.com" = lib.mkDefault "!gh auth git-credential";
+  dotfiles.cln.providers.gh = lib.mkDefault {
+    type = "github";
+    host = "github.com";
+    defaultNamespace = "pedropb";
+  };
 
   home.file = {
     ".gitconfig".source = ../config/git/config;
@@ -127,6 +172,17 @@ in
     "git/personal".source = ../config/git/personal;
     "wezterm/wezterm.lua".source = ../config/wezterm/wezterm.lua;
     "cmux/cmux.json".source = ../config/cmux/cmux.json;
+    "cln/config.toml".source = (pkgs.formats.toml { }).generate "cln-config.toml" (
+      { default_provider = config.dotfiles.cln.defaultProvider; }
+      // lib.optionalAttrs (clnProviders != { }) {
+        providers = lib.mapAttrs (_: p:
+          { inherit (p) type host; }
+          // lib.optionalAttrs (p.defaultNamespace != null) {
+            default_namespace = p.defaultNamespace;
+          }
+        ) clnProviders;
+      }
+    );
   } // lib.mapAttrs' (name: identity:
     lib.nameValuePair "git/identities/${name}" {
       text = ''

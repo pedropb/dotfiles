@@ -72,6 +72,31 @@ GitLab host.
 The repository is the source of truth. Edit files here, then activate the profile;
 do not edit the managed files in `$HOME`.
 
+## Tools
+
+[`tools/cln`](tools/cln/README.md) clones a repository by
+provider/namespace/repo shorthand instead of the full HTTPS remote URL, e.g.
+`cln gh dotfiles` or `cln octocat/Hello-World`, into `~/src/<host>/<namespace>/<repo>`
+so it's immediately reachable with `scd <namespace>/<repo>`. Its providers come from
+`dotfiles.cln.defaultProvider`/`dotfiles.cln.providers`, rendered to
+`~/.config/cln/config.toml`; the profile sets a `gh` provider for
+`github.com`. Add private forges to the git-ignored `home/local.nix`, the
+same way private credential helpers are added above:
+
+```nix
+{ ... }:
+{
+  dotfiles.cln.providers.corp = {
+    type = "gitlab";
+    host = "git.example.com";
+  };
+}
+```
+
+`tools/` holds each such standalone program in its own directory, built and
+tested independently of this Home Manager profile; see
+[`tools/README.md`](tools/README.md).
+
 ## Bootstrap
 
 Nix with flakes must be available in the target environment. The flake selects the
