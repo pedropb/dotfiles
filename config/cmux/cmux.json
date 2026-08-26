@@ -62,7 +62,7 @@
   //     "newWorkspacePlacement" : "afterCurrent"
   //   },
 
-  //   "terminal" : {
+     "terminal" : {
   //     "sessionContentAlignment" : "center",
   //     "textBoxSubmitActions" : [
   //       {
@@ -102,7 +102,7 @@
   //         "id" : "pi"
   //       }
   //     ],
-  //     "copyOnSelect" : false,
+     "copyOnSelect" : true,
   //     "rendererRealization" : {
   //       "maxWarmRenderers" : 1,
   //       "enabled" : true,
@@ -169,7 +169,7 @@
   //     "showAgentActivity" : true,
   //     "showCustomMetadata" : true,
   //     "hideAllDetails" : false
-  //   },
+     },
 
   //   "workspaceColors" : {
   //     "notificationBadgeColor" : null,
