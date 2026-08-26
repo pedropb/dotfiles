@@ -18,3 +18,7 @@ bootstrap:
 # Run cln's test suite.
 test-cln:
   cd tools/cln && go test ./...
+
+# Bump the omp package pin: fetch release SHAs and rewrite home/omp.nix.
+omp-update version:
+  ./bin/omp-update.sh {{version}}
