@@ -1,0 +1,10 @@
+# Ghostty terminal config, shared by Ghostty.app and cmux's embedded
+# Ghostty core (cmux reads ~/.config/ghostty/config; see `cmux --help`).
+#
+# macOS composes the Option key into accented/special characters by
+# default (Option+A -> "å"), so terminal programs never see it as an
+# Alt modifier. omp's Alt+A "open Agent Hub" chord (and any other
+# Alt-based keybinding in vim/tmux/etc.) needs Option to be reported
+# as Alt instead. `left` keeps the right Option key free for typing
+# accented characters; use `true` if you don't need that.
+macos-option-as-alt = left
