@@ -53,10 +53,10 @@ host = "git.example.com"
     daily.
 
 In this repository, `home/default.nix` renders this file from the
-`dotfiles.cln.defaultProvider`/`dotfiles.cln.providers` Nix options (see the
-root README). Add private, non-public forges to the git-ignored
-`home/local.nix` rather than here — that mirrors the existing
-`dotfiles.git.credentialHelpers` pattern for the same reason.
+`dotfiles.cln.defaultProvider`/`dotfiles.cln.providers` Nix options. Add
+private, non-public forges to the git-ignored `home/local.nix` rather than
+here — see [`home/local.nix.md`](../../home/local.nix.md) for the option
+and an example.
 
 The parser only understands this subset of TOML (flat root keys plus one
 level of `[providers.<alias>]` tables of string values) — see the doc

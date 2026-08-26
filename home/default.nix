@@ -16,8 +16,8 @@ in
       type = lib.types.attrsOf (lib.types.submodule {
         options = {
           gitdir = lib.mkOption {
-            type = lib.types.str;
-            description = "Git directory prefix to match.";
+            type = lib.types.either lib.types.str (lib.types.listOf lib.types.str);
+            description = "Git directory prefix (or prefixes) to match.";
           };
           name = lib.mkOption {
             type = lib.types.str;
@@ -164,10 +164,12 @@ in
           helper =
           helper = ${helper}
       '') credentialHelpers
-      ++ lib.mapAttrsToList (name: identity: ''
-        [includeIf "gitdir:${identity.gitdir}"]
-          path = ~/.config/git/identities/${name}
-      '') conditionalIdentities
+      ++ lib.concatLists (lib.mapAttrsToList (name: identity:
+        map (gitdir: ''
+          [includeIf "gitdir:${gitdir}"]
+            path = ~/.config/git/identities/${name}
+        '') (lib.toList identity.gitdir)
+      ) conditionalIdentities)
     );
     "git/personal".source = ../config/git/personal;
     "wezterm/wezterm.lua".source = ../config/wezterm/wezterm.lua;

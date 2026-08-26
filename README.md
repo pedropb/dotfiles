@@ -14,21 +14,10 @@ Portable Home Manager configuration for macOS and Linux, including Linux distrib
 - tmux: `~/.config/tmux/tmux.conf` (the XDG path, read by tmux 3.1+). A
   host-provided tmux config is sourced first, then overridden here.
 
-Private path-specific Git identities belong in the ignored `home/local.nix`. It
-can add `dotfiles.git.conditionalIdentities.<key>` with `gitdir`, `name`, and
-`email`; activation writes the matching identity to `~/.config/git/identities`
-and includes it only for that Git directory prefix.
-
-```nix
-{ ... }:
-{
-  dotfiles.git.conditionalIdentities.example = {
-    gitdir = "~/src/example.com/";
-    name = "Example Author";
-    email = "author@example.com";
-  };
-}
-```
+Private, machine-specific configuration — Git identities, credential
+helpers, private [`cln`](tools/cln/README.md) forges — belongs in the
+git-ignored `home/local.nix`, documented with examples in
+[`home/local.nix.md`](home/local.nix.md).
 
 ## Git authentication
 
@@ -39,20 +28,10 @@ The profile installs `gh` and `glab`. GitHub HTTPS remotes use
 gh auth login
 ```
 
-Private credential helpers also belong in ignored `home/local.nix`. Add one
-entry per HTTPS remote host; the generated host-specific configuration clears
-inherited credential helpers before invoking the selected CLI.
-
-```nix
-{ ... }:
-{
-  dotfiles.git.credentialHelpers."gitlab.example.com" =
-    "!glab auth git-credential";
-}
-```
-
-Run `just switch` after changing the entry. The host key must exactly match the
-remote URL's hostname, including a non-default port.
+`local.nix` also carries private credential helper entries, one per HTTPS
+remote host; see [`home/local.nix.md`](home/local.nix.md) for the option,
+its exact-hostname-match rule, and an example. Run `just switch` after
+changing one.
 
 For a self-managed GitLab instance, create a personal access token with `api`
 and `write_repository` scopes, then store it in the operating-system keyring:
@@ -80,18 +59,8 @@ provider/namespace/repo shorthand instead of the full HTTPS remote URL, e.g.
 so it's immediately reachable with `scd <namespace>/<repo>`. Its providers come from
 `dotfiles.cln.defaultProvider`/`dotfiles.cln.providers`, rendered to
 `~/.config/cln/config.toml`; the profile sets a `gh` provider for
-`github.com`. Add private forges to the git-ignored `home/local.nix`, the
-same way private credential helpers are added above:
-
-```nix
-{ ... }:
-{
-  dotfiles.cln.providers.corp = {
-    type = "gitlab";
-    host = "git.example.com";
-  };
-}
-```
+`github.com`. Add private forges in `home/local.nix`; see
+[`home/local.nix.md`](home/local.nix.md) for the option and an example.
 
 `tools/` holds each such standalone program in its own directory, built and
 tested independently of this Home Manager profile; see
