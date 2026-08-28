@@ -19,5 +19,6 @@ lib.optional stdenv.isDarwin flameshot
   glab
   tmux
   (pkgs.callPackage ../tools/cln/package.nix { })
+  (pkgs.callPackage ../tools/dotfiles-local/package.nix { })
   (pkgs.callPackage ./omp.nix { })
 ]

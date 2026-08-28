@@ -1,0 +1,13 @@
+# Tracked placeholder for the `local` flake input.
+#
+# It exists so a fresh clone (and `nix flake check`) can evaluate the profile
+# without any machine-specific state. Your real configuration lives in
+# ~/.config/dotfiles/local.toml, which `just switch` supplies via
+# --override-input; see ../local-config.md.
+#
+# Nothing private belongs here: this file is committed.
+
+[machine]
+system = "x86_64-linux"
+username = "nixuser"
+home_directory = "/home/nixuser"

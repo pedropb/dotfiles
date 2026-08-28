@@ -54,9 +54,10 @@ host = "git.example.com"
 
 In this repository, `home/default.nix` renders this file from the
 `dotfiles.cln.defaultProvider`/`dotfiles.cln.providers` Nix options. Add
-private, non-public forges to the git-ignored `home/local.nix` rather than
-here — see [`home/local.nix.md`](../../home/local.nix.md) for the option
-and an example.
+private, non-public forges to `~/.config/dotfiles/local.toml` rather than here
+— `dotfiles-local provider add corp --type gitlab --host git.example.com`; see
+[`home/local-config.md`](../../home/local-config.md) for the schema and an
+example.
 
 The parser only understands this subset of TOML (flat root keys plus one
 level of `[providers.<alias>]` tables of string values) — see the doc
@@ -89,9 +90,9 @@ cached, however stale, before giving up on fuzzy matching.
 
 `cln` never handles credentials itself. The actual `git clone` is
 authenticated by your global git credential helper — in this repository,
-`home/default.nix` and `home/local.nix` already wire `gh auth git-credential`
-/ `glab auth git-credential` per host (see the root README's
-"Git authentication" section).
+`home/default.nix` and `~/.config/dotfiles/local.toml` already wire
+`gh auth git-credential` / `glab auth git-credential` per host (see the root
+README's "Git authentication" section).
 
 Listing a namespace's repositories for fuzzy matching does need an
 authenticated call, so `cln` shells out to the provider's own CLI, reusing

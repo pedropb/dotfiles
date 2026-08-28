@@ -14,10 +14,11 @@ Portable Home Manager configuration for macOS and Linux, including Linux distrib
 - tmux: `~/.config/tmux/tmux.conf` (the XDG path, read by tmux 3.1+). A
   host-provided tmux config is sourced first, then overridden here.
 
-Private, machine-specific configuration — Git identities, credential
-helpers, private [`cln`](tools/cln/README.md) forges — belongs in the
-git-ignored `home/local.nix`, documented with examples in
-[`home/local.nix.md`](home/local.nix.md).
+Private, machine-specific configuration — which user the profile builds for,
+Git identities, credential helpers, private [`cln`](tools/cln/README.md)
+forges — lives outside the checkout in `~/.config/dotfiles/local.toml`,
+maintained by [`dotfiles-local`](tools/dotfiles-local/README.md) and
+documented with examples in [`home/local-config.md`](home/local-config.md).
 
 ## Git authentication
 
@@ -28,10 +29,16 @@ The profile installs `gh` and `glab`. GitHub HTTPS remotes use
 gh auth login
 ```
 
-`local.nix` also carries private credential helper entries, one per HTTPS
-remote host; see [`home/local.nix.md`](home/local.nix.md) for the option,
-its exact-hostname-match rule, and an example. Run `just switch` after
-changing one.
+`local.toml` also carries private credential helper entries, one per HTTPS
+remote host:
+
+```sh
+dotfiles-local helper set gitlab.example.com '!glab auth git-credential'
+just switch
+```
+
+See [`home/local-config.md`](home/local-config.md) for the key and its
+exact-hostname-match rule.
 
 For a self-managed GitLab instance, create a personal access token with `api`
 and `write_repository` scopes, then store it in the operating-system keyring:
@@ -59,8 +66,8 @@ provider/namespace/repo shorthand instead of the full HTTPS remote URL, e.g.
 so it's immediately reachable with `scd <namespace>/<repo>`. Its providers come from
 `dotfiles.cln.defaultProvider`/`dotfiles.cln.providers`, rendered to
 `~/.config/cln/config.toml`; the profile sets a `gh` provider for
-`github.com`. Add private forges in `home/local.nix`; see
-[`home/local.nix.md`](home/local.nix.md) for the option and an example.
+`github.com`. Add private forges with `dotfiles-local provider add`; see
+[`home/local-config.md`](home/local-config.md) for the schema and an example.
 
 `tools/` holds each such standalone program in its own directory, built and
 tested independently of this Home Manager profile; see
@@ -68,23 +75,29 @@ tested independently of this Home Manager profile; see
 
 ## Bootstrap
 
-Nix with flakes must be available in the target environment. The flake selects the
-current Nix system automatically and supports Linux and macOS on both x86_64 and
-ARM64. For Windows, install and activate it inside a WSL 2 distribution; native
-Windows is not a Home Manager target.
+Nix with flakes must be available in the target environment. The flake supports
+Linux and macOS on both x86_64 and ARM64. For Windows, install and activate it
+inside a WSL 2 distribution; native Windows is not a Home Manager target.
 
-The profile uses the invoking user's `USER` and `HOME`. Its package inventory is
-defined in [`home/packages.nix`](home/packages.nix).
+The user, home directory, and system the profile builds for are recorded in
+`~/.config/dotfiles/local.toml` instead of being read from the environment,
+which is what keeps evaluation pure: no `--impure`, and `nix flake check` works
+on a fresh clone. The package inventory is defined in
+[`home/packages.nix`](home/packages.nix).
 
 ```sh
-nix run --impure .#home-manager -- switch --impure -b before-home-manager --flake .#default
+just bootstrap
 ```
+
+That prompts for your private configuration, then activates the profile,
+preserving conflicting files as `*.before-home-manager`.
 
 After activation:
 
 ```sh
-just check    # evaluate the flake
+just check    # evaluate the flake and this machine's profile
 just switch   # deploy repository changes
+just local    # show the machine-specific configuration in use
 ```
 
 WezTerm remains an external GUI installation; Home Manager owns only its

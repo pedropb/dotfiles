@@ -21,6 +21,18 @@
         "type": "github"
       }
     },
+    "local": {
+      "flake": false,
+      "locked": {
+        "path": "./home/local-stub",
+        "type": "path"
+      },
+      "original": {
+        "path": "./home/local-stub",
+        "type": "path"
+      },
+      "parent": []
+    },
     "nixpkgs": {
       "locked": {
         "lastModified": 1786313170,
@@ -40,6 +52,7 @@
     "root": {
       "inputs": {
         "home-manager": "home-manager",
+        "local": "local",
         "nixpkgs": "nixpkgs"
       }
     }

@@ -1,15 +1,16 @@
-{ pkgs, lib, config, ... }:
+{ pkgs, lib, config, localConfig, ... }:
 let
-  username = builtins.getEnv "USER";
-  homeDirectory = builtins.getEnv "HOME";
-  localModule = builtins.toPath "${homeDirectory}/src/github.com/pedropb/dotfiles/home/local.nix";
+  username = localConfig.machine.username;
+  homeDirectory = localConfig.machine.home_directory;
+  localGit = localConfig.git or { };
+  localCln = localConfig.cln or { };
   conditionalIdentities = config.dotfiles.git.conditionalIdentities;
   credentialHelpers = config.dotfiles.git.credentialHelpers;
   clnProviders = config.dotfiles.cln.providers;
 in
 {
 
-  imports = [ ./screenshot.nix ] ++ lib.optional (builtins.pathExists localModule) localModule;
+  imports = [ ./screenshot.nix ];
 
   options.dotfiles.git = {
     conditionalIdentities = lib.mkOption {
@@ -79,7 +80,7 @@ in
       };
       description = ''
         cln providers, rendered to ~/.config/cln/config.toml. Add private,
-        non-public forges in the git-ignored home/local.nix instead of here.
+        non-public forges in ~/.config/dotfiles/local.toml instead of here.
       '';
     };
   };
@@ -87,8 +88,11 @@ in
   config = {
   assertions = [
     {
-      assertion = username != "" && homeDirectory != "";
-      message = "Evaluate this Home Manager profile with --impure so USER and HOME are available.";
+      assertion = clnProviders ? ${config.dotfiles.cln.defaultProvider};
+      message = ''
+        dotfiles.cln.defaultProvider is "${config.dotfiles.cln.defaultProvider}", which is
+        not a configured provider. Known providers: ${lib.concatStringsSep ", " (lib.attrNames clnProviders)}.
+      '';
     }
   ];
 
@@ -103,14 +107,36 @@ in
   # Keep WezTerm's GUI installation independent; Nix manages its configuration.
   home.packages = import ./packages.nix { inherit pkgs; };
 
-  # The gh CLI answers for github.com; private forges add their own helper in
-  # home/local.nix.
-  dotfiles.git.credentialHelpers."github.com" = lib.mkDefault "!gh auth git-credential";
-  dotfiles.cln.providers.gh = lib.mkDefault {
-    type = "github";
-    host = "github.com";
-    defaultNamespace = "pedropb";
-  };
+  # Private, machine-specific configuration arrives as data through the
+  # `local` flake input (~/.config/dotfiles/local.toml), maintained by the
+  # dotfiles-local CLI; see home/local-config.md for the schema.
+  #
+  # The public entries below are the baseline: the gh CLI answers for
+  # github.com, and gh is cln's built-in provider. A local entry under the
+  # same key replaces the baseline outright.
+  dotfiles.git.conditionalIdentities = localGit.identities or { };
+
+  dotfiles.git.credentialHelpers =
+    { "github.com" = "!gh auth git-credential"; }
+    // (localGit.credential_helpers or { });
+
+  dotfiles.cln.providers =
+    {
+      gh = {
+        type = "github";
+        host = "github.com";
+        defaultNamespace = "pedropb";
+      };
+    }
+    // lib.mapAttrs (_: provider:
+      { inherit (provider) type host; }
+      // lib.optionalAttrs (provider ? default_namespace) {
+        defaultNamespace = provider.default_namespace;
+      }
+    ) (localCln.providers or { });
+
+  dotfiles.cln.defaultProvider =
+    lib.mkIf (localCln ? default_provider) localCln.default_provider;
 
   home.file = {
     ".gitconfig".source = ../config/git/config;
