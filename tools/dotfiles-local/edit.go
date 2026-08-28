@@ -71,11 +71,7 @@ func identityAdd(env *env, args []string) error {
 	if err != nil {
 		return err
 	}
-	git := cfg.gitSection()
-	if git.Identities == nil {
-		git.Identities = map[string]Identity{}
-	}
-	git.Identities[name] = Identity{Gitdir: gitdirs, Name: *author, Email: *email}
+	cfg.setIdentity(name, Identity{Gitdir: gitdirs, Name: *author, Email: *email})
 	if err := commit(env, cfg); err != nil {
 		return err
 	}
@@ -92,10 +88,9 @@ func identityRemove(env *env, args []string) error {
 	if err != nil {
 		return err
 	}
-	if _, ok := cfg.identities()[name]; !ok {
-		return fmt.Errorf("no identity named %q", name)
+	if err := cfg.removeIdentity(name); err != nil {
+		return err
 	}
-	delete(cfg.Git.Identities, name)
 	if err := commit(env, cfg); err != nil {
 		return err
 	}
@@ -129,11 +124,7 @@ func helperSet(env *env, args []string) error {
 	if err != nil {
 		return err
 	}
-	git := cfg.gitSection()
-	if git.CredentialHelpers == nil {
-		git.CredentialHelpers = map[string]string{}
-	}
-	git.CredentialHelpers[host] = command
+	cfg.setCredentialHelper(host, command)
 	if err := commit(env, cfg); err != nil {
 		return err
 	}
@@ -150,10 +141,9 @@ func helperRemove(env *env, args []string) error {
 	if err != nil {
 		return err
 	}
-	if _, ok := cfg.credentialHelpers()[host]; !ok {
-		return fmt.Errorf("no credential helper for %q", host)
+	if err := cfg.removeCredentialHelper(host); err != nil {
+		return err
 	}
-	delete(cfg.Git.CredentialHelpers, host)
 	if err := commit(env, cfg); err != nil {
 		return err
 	}
@@ -199,13 +189,9 @@ func providerAdd(env *env, args []string) error {
 	if err != nil {
 		return err
 	}
-	cln := cfg.clnSection()
-	if cln.Providers == nil {
-		cln.Providers = map[string]Provider{}
-	}
-	cln.Providers[alias] = Provider{Type: *kind, Host: *host, DefaultNamespace: *namespace}
+	cfg.setProvider(alias, Provider{Type: *kind, Host: *host, DefaultNamespace: *namespace})
 	if *makeDefault {
-		cln.DefaultProvider = alias
+		cfg.setDefaultProvider(alias)
 	}
 	if err := commit(env, cfg); err != nil {
 		return err
@@ -226,14 +212,13 @@ func providerRemove(env *env, args []string) error {
 	if err != nil {
 		return err
 	}
-	if _, ok := cfg.providers()[alias]; !ok {
-		return fmt.Errorf("no provider named %q", alias)
+	fellBack, err := cfg.removeProvider(alias)
+	if err != nil {
+		return err
 	}
-	delete(cfg.Cln.Providers, alias)
-	if cfg.Cln.DefaultProvider == alias {
+	if fellBack {
 		// Leaving it would fail validation; the built-in gh provider is the
 		// only alias guaranteed to exist.
-		cfg.Cln.DefaultProvider = ""
 		fmt.Fprintf(env.err, "default provider was %s; falling back to %s\n", alias, builtinProvider)
 	}
 	if err := commit(env, cfg); err != nil {
@@ -260,11 +245,7 @@ func runDefaultProvider(env *env, args []string) error {
 		return errors.New("usage: dotfiles-local default-provider [<alias>]")
 	}
 	alias := args[0]
-	if alias == builtinProvider {
-		cfg.clnSection().DefaultProvider = ""
-	} else {
-		cfg.clnSection().DefaultProvider = alias
-	}
+	cfg.setDefaultProvider(alias)
 	if err := commit(env, cfg); err != nil {
 		return err
 	}

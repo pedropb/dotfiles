@@ -1,6 +1,7 @@
 package main
 
 import (
+	"os"
 	"strings"
 	"testing"
 )
@@ -261,5 +262,47 @@ func TestMachineMismatches(t *testing.T) {
 	}
 	if len(machineMismatches(Machine{}, detected)) != 0 {
 		t.Error("unset fields are not mismatches")
+	}
+}
+
+// saveConfig must not lose the previous file: a wizard run or a typo'd flag
+// command should have a one-step way back.
+func TestSaveConfigBacksUpExistingFile(t *testing.T) {
+	dir := t.TempDir()
+	t.Setenv("DOTFILES_LOCAL_DIR", dir)
+
+	first := Config{Machine: Machine{System: "x86_64-darwin", Username: "first", HomeDirectory: "/Users/first"}}
+	if err := saveConfig(first); err != nil {
+		t.Fatalf("saving first config: %v", err)
+	}
+	path, err := configPath()
+	if err != nil {
+		t.Fatalf("configPath: %v", err)
+	}
+	if _, err := os.Stat(path + ".bak"); !os.IsNotExist(err) {
+		t.Fatalf("first save should not create a backup, got err=%v", err)
+	}
+	firstBytes, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatalf("reading first save: %v", err)
+	}
+
+	second := Config{Machine: Machine{System: "aarch64-linux", Username: "second", HomeDirectory: "/home/second"}}
+	if err := saveConfig(second); err != nil {
+		t.Fatalf("saving second config: %v", err)
+	}
+	backupBytes, err := os.ReadFile(path + ".bak")
+	if err != nil {
+		t.Fatalf("reading backup: %v", err)
+	}
+	if string(backupBytes) != string(firstBytes) {
+		t.Errorf("backup does not match the pre-overwrite content:\n--- backup ---\n%s\n--- first ---\n%s", backupBytes, firstBytes)
+	}
+	current, _, err := loadConfig()
+	if err != nil {
+		t.Fatalf("loading current config: %v", err)
+	}
+	if current.Machine.Username != "second" {
+		t.Errorf("current config should be the second save, got %+v", current.Machine)
 	}
 }

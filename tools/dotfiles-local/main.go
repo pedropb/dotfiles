@@ -20,14 +20,15 @@ const usage = `usage: dotfiles-local <command> [arguments]
 
 setup
   ensure [-f]                 record this host in [machine]; print the config directory
-  init                        interactive setup for identities, helpers, and providers
+  init                        first-run wizard: full-screen editor, prefilled from this host
+  edit                        full-screen editor for an existing local.toml
 
 inspect
   path                        print the config directory
   show                        print the current local.toml
   check                       validate local.toml without changing it
 
-edit
+edit a single field (scriptable; init and edit ask for all of these too)
   identity add <name> --author <name> --email <email> --gitdir <prefix> [--gitdir <prefix>]
   identity rm <name>
   helper set <host> <command>
@@ -37,7 +38,8 @@ edit
   default-provider [<alias>]
 
 Changes take effect on the next ` + "`just switch`" + `. Set DOTFILES_LOCAL_DIR to use a
-directory other than $XDG_CONFIG_HOME/dotfiles.
+directory other than $XDG_CONFIG_HOME/dotfiles. init and edit back up an
+existing file to local.toml.bak before overwriting it.
 `
 
 type env struct {
@@ -67,6 +69,8 @@ func run(env *env, argv []string) error {
 		return runEnsure(env, argv[1:])
 	case "init":
 		return runInit(env, argv[1:])
+	case "edit":
+		return runEdit(env, argv[1:])
 	case "path":
 		return runPath(env, argv[1:])
 	case "show":

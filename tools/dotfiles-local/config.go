@@ -135,6 +135,73 @@ func (c Config) defaultProvider() string {
 	return c.Cln.DefaultProvider
 }
 
+// setIdentity adds or replaces a git identity. Shared by the identity add
+// flag command and the interactive editor so the two never diverge.
+func (c *Config) setIdentity(name string, identity Identity) {
+	git := c.gitSection()
+	if git.Identities == nil {
+		git.Identities = map[string]Identity{}
+	}
+	git.Identities[name] = identity
+}
+
+func (c *Config) removeIdentity(name string) error {
+	if _, ok := c.identities()[name]; !ok {
+		return fmt.Errorf("no identity named %q", name)
+	}
+	delete(c.Git.Identities, name)
+	return nil
+}
+
+func (c *Config) setCredentialHelper(host, command string) {
+	git := c.gitSection()
+	if git.CredentialHelpers == nil {
+		git.CredentialHelpers = map[string]string{}
+	}
+	git.CredentialHelpers[host] = command
+}
+
+func (c *Config) removeCredentialHelper(host string) error {
+	if _, ok := c.credentialHelpers()[host]; !ok {
+		return fmt.Errorf("no credential helper for %q", host)
+	}
+	delete(c.Git.CredentialHelpers, host)
+	return nil
+}
+
+func (c *Config) setProvider(alias string, provider Provider) {
+	cln := c.clnSection()
+	if cln.Providers == nil {
+		cln.Providers = map[string]Provider{}
+	}
+	cln.Providers[alias] = provider
+}
+
+// removeProvider deletes alias and reports whether it was the configured
+// default provider — which is reset to the built-in gh, since leaving it
+// dangling would fail validation.
+func (c *Config) removeProvider(alias string) (fellBackToDefault bool, err error) {
+	if _, ok := c.providers()[alias]; !ok {
+		return false, fmt.Errorf("no provider named %q", alias)
+	}
+	delete(c.Cln.Providers, alias)
+	if c.Cln.DefaultProvider == alias {
+		c.Cln.DefaultProvider = ""
+		return true, nil
+	}
+	return false, nil
+}
+
+// setDefaultProvider records alias as the default, or clears the override
+// when alias is the built-in gh provider.
+func (c *Config) setDefaultProvider(alias string) {
+	if alias == builtinProvider {
+		c.clnSection().DefaultProvider = ""
+	} else {
+		c.clnSection().DefaultProvider = alias
+	}
+}
+
 // configDir is $DOTFILES_LOCAL_DIR, else $XDG_CONFIG_HOME/dotfiles, else
 // ~/.config/dotfiles. It is deliberately outside the repository checkout: the
 // file is private, survives re-clones, and never makes the work tree dirty.
@@ -229,6 +296,9 @@ func saveConfig(cfg Config) error {
 	if err := os.MkdirAll(dir, 0o700); err != nil {
 		return fmt.Errorf("creating %s: %w", dir, err)
 	}
+	if err := backupExisting(path); err != nil {
+		return err
+	}
 	tmp, err := os.CreateTemp(dir, ".local.toml.*")
 	if err != nil {
 		return fmt.Errorf("creating temporary file in %s: %w", dir, err)
@@ -246,6 +316,24 @@ func saveConfig(cfg Config) error {
 	}
 	if err := os.Rename(tmp.Name(), path); err != nil {
 		return fmt.Errorf("replacing %s: %w", path, err)
+	}
+	return nil
+}
+
+// backupExisting copies path to path+".bak" before it is replaced, so a
+// commit that turns out to be a mistake — a wizard run that overwrote
+// hand-tuned settings, a typo in a flag command — has one recovery step. A
+// no-op the first time a config is written, since there is nothing to keep.
+func backupExisting(path string) error {
+	data, err := os.ReadFile(path)
+	if errors.Is(err, os.ErrNotExist) {
+		return nil
+	}
+	if err != nil {
+		return fmt.Errorf("reading %s for backup: %w", path, err)
+	}
+	if err := os.WriteFile(path+".bak", data, 0o600); err != nil {
+		return fmt.Errorf("writing backup %s: %w", path+".bak", err)
 	}
 	return nil
 }

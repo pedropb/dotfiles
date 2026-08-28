@@ -264,3 +264,28 @@ func TestUnknownCommand(t *testing.T) {
 		t.Errorf("expected an error naming the command, got %v", err)
 	}
 }
+
+func TestEditAndInitRejectExtraArguments(t *testing.T) {
+	h := newHarness(t)
+	for _, cmd := range []string{"edit", "init"} {
+		_, _, err := h.run(cmd, "extra")
+		if err == nil || !strings.Contains(err.Error(), "takes no arguments") {
+			t.Errorf("%s: expected a no-arguments error, got %v", cmd, err)
+		}
+	}
+}
+
+// The full-screen editor needs a real terminal; over the pipes go test gives
+// a subprocess it must fail cleanly instead of hanging or crashing bubbletea.
+func TestEditAndInitRequireInteractiveTerminal(t *testing.T) {
+	if interactive() {
+		t.Skip("stdin is a terminal in this environment; the guard can't be observed")
+	}
+	h := newHarness(t)
+	for _, cmd := range []string{"edit", "init"} {
+		_, _, err := h.run(cmd)
+		if err == nil || !strings.Contains(err.Error(), "interactive terminal") {
+			t.Errorf("%s: expected an interactive-terminal error, got %v", cmd, err)
+		}
+	}
+}
