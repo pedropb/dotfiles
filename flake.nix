@@ -8,6 +8,14 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # x86_64-darwin is deprecated upstream; pin it separately so it doesn't
+    # hold back nixpkgs/home-manager for every other system.
+    nixpkgsIntelDarwin.url = "github:NixOS/nixpkgs/nixpkgs-26.05-darwin";
+    home-managerIntelDarwin = {
+      url = "github:nix-community/home-manager/release-26.05";
+      inputs.nixpkgs.follows = "nixpkgsIntelDarwin";
+    };
+
     # Machine-specific and private configuration, as data. The tracked stub
     # keeps a fresh clone evaluable (and `nix flake check` meaningful); real
     # machines point this at ~/.config/dotfiles with --override-input, which
@@ -18,20 +26,26 @@
     };
   };
 
-  outputs = { nixpkgs, home-manager, local, ... }:
+  outputs = { nixpkgs, home-manager, nixpkgsIntelDarwin, home-managerIntelDarwin, local, ... }:
     let
       inherit (nixpkgs) lib;
 
       systems = [ "x86_64-darwin" "aarch64-darwin" "x86_64-linux" "aarch64-linux" ];
-      forAllSystems = f: lib.genAttrs systems (system: f nixpkgs.legacyPackages.${system});
+
+      isIntelDarwin = system: system == "x86_64-darwin";
+      nixpkgsFor = system: if isIntelDarwin system then nixpkgsIntelDarwin else nixpkgs;
+      homeManagerFor = system: if isIntelDarwin system then home-managerIntelDarwin else home-manager;
+      pkgsFor = system: (nixpkgsFor system).legacyPackages.${system};
+
+      forAllSystems = f: lib.genAttrs systems (system: f (pkgsFor system));
 
       localConfig = builtins.fromTOML (builtins.readFile "${local}/local.toml");
     in
     {
       # The profile's system, user, and home directory come from local.toml,
       # so nothing here reads the ambient environment: evaluation is pure.
-      homeConfigurations.default = home-manager.lib.homeManagerConfiguration {
-        pkgs = nixpkgs.legacyPackages.${localConfig.machine.system};
+      homeConfigurations.default = (homeManagerFor localConfig.machine.system).lib.homeManagerConfiguration {
+        pkgs = pkgsFor localConfig.machine.system;
         extraSpecialArgs = { inherit localConfig; };
         modules = [ ./home/default.nix ];
       };
