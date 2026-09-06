@@ -5,30 +5,15 @@ default:
 
 # Evaluate the flake and this machine's profile without changing anything.
 check:
-  #!/usr/bin/env bash
-  set -euo pipefail
-  nix flake check
-  nix run .#dotfiles-local -- check
-  dir="$(nix run .#dotfiles-local -- ensure)"
-  nix eval --raw .#homeConfigurations.default.activationPackage.drvPath \
-    --override-input local "path:$dir" >/dev/null
-  echo "profile evaluates"
+  ./bin/check.sh
 
 # Build and activate the Home Manager profile.
 switch:
-  #!/usr/bin/env bash
-  set -euo pipefail
-  dir="$(nix run .#dotfiles-local -- ensure)"
-  nix run .#home-manager -- switch --flake .#default --override-input local "path:$dir"
+  ./bin/switch.sh
 
 # First activation: prompt for private configuration, then activate, keeping conflicting files as *.before-home-manager.
 bootstrap:
-  #!/usr/bin/env bash
-  set -euo pipefail
-  nix run .#dotfiles-local -- init
-  dir="$(nix run .#dotfiles-local -- ensure)"
-  nix run .#home-manager -- switch -b before-home-manager --flake .#default \
-    --override-input local "path:$dir"
+  ./bin/bootstrap.sh
 
 # Print the machine-specific, private configuration this profile is built from.
 local:
