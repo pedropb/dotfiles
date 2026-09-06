@@ -36,26 +36,21 @@ config.colors = {
   },
 }
 
--- Ctrl-b is a tmux-style prefix. Vim's split and navigation keys apply after it.
 config.leader = { key = "b", mods = "CTRL", timeout_milliseconds = 1000 }
 config.keys = {
   -- Preserve Ctrl-b for readline/zsh when it is pressed twice.
   { key = "b", mods = "LEADER", action = act.SendKey({ key = "b", mods = "CTRL" }) },
 
-  -- macOS-style command shortcuts; send portable readline/zsh controls.
   { key = "LeftArrow", mods = "CMD", action = act.SendKey({ key = "a", mods = "CTRL" }) },
   { key = "RightArrow", mods = "CMD", action = act.SendKey({ key = "e", mods = "CTRL" }) },
   { key = "Backspace", mods = "CMD", action = act.SendKey({ key = "u", mods = "CTRL" }) },
 
-  -- Pane lifecycle: Ctrl-b v makes a vertical split; Ctrl-b s makes a horizontal split.
   { key = "v", mods = "LEADER", action = act.SplitHorizontal({ domain = "CurrentPaneDomain" }) },
   { key = "s", mods = "LEADER", action = act.SplitVertical({ domain = "CurrentPaneDomain" }) },
   { key = "x", mods = "LEADER", action = act.CloseCurrentPane({ confirm = true }) },
 
-  -- Zen mode: maximize or restore the active pane.
   { key = "z", mods = "LEADER", action = act.TogglePaneZoomState },
 
-  -- Vim-style pane focus and resizing.
   { key = "h", mods = "LEADER", action = act.ActivatePaneDirection("Left") },
   { key = "j", mods = "LEADER", action = act.ActivatePaneDirection("Down") },
   { key = "k", mods = "LEADER", action = act.ActivatePaneDirection("Up") },
@@ -65,7 +60,6 @@ config.keys = {
   { key = "K", mods = "LEADER|SHIFT", action = act.AdjustPaneSize({ "Up", 5 }) },
   { key = "L", mods = "LEADER|SHIFT", action = act.AdjustPaneSize({ "Right", 5 }) },
 
-  -- Tab lifecycle and selection.
   { key = "c", mods = "LEADER", action = act.SpawnTab("CurrentPaneDomain") },
   { key = "[", mods = "LEADER", action = act.ActivateCopyMode },
   { key = "1", mods = "LEADER", action = act.ActivateTab(0) },

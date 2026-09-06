@@ -3,8 +3,7 @@
 // home directory to build for, work git identities, per-host credential
 // helpers, and private cln providers.
 //
-// The flake reads that file as its "local" input, so nothing in the profile
-// reads the environment at evaluation time and `just switch` needs no
+// The flake reads that file as its "local" input, so activation needs no
 // --impure. See README.md and ../../home/local-config.md.
 package main
 
@@ -86,9 +85,6 @@ func run(env *env, argv []string) error {
 	}
 }
 
-// runEnsure is what `just switch` calls: it makes the config directory exist
-// and be valid, then prints its path for --override-input. It is quiet on the
-// happy path and never prompts, so it is safe in scripts and over ssh.
 func runEnsure(env *env, args []string) error {
 	fs := newFlagSet("ensure", env.err)
 	force := fs.Bool("f", false, "replace recorded [machine] values with this host's")

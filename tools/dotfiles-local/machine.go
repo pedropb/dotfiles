@@ -61,10 +61,6 @@ func detectUsername(home string) string {
 	return filepath.Base(home)
 }
 
-// ensureMachine fills in missing [machine] fields and reports whether the
-// config changed. Existing values are kept unless force is set, so a
-// deliberately edited username survives a `just switch`; a value that
-// disagrees with the host is reported by the caller instead.
 func ensureMachine(cfg *Config, detected Machine, force bool) bool {
 	changed := false
 	set := func(field *string, value string) {
@@ -80,7 +76,6 @@ func ensureMachine(cfg *Config, detected Machine, force bool) bool {
 	return changed
 }
 
-// machineMismatches lists recorded values that disagree with this host.
 func machineMismatches(recorded, detected Machine) []string {
 	var out []string
 	compare := func(key, have, want string) {

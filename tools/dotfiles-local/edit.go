@@ -8,7 +8,6 @@ import (
 	"strings"
 )
 
-// stringList collects a flag that may be repeated, e.g. --gitdir.
 type stringList []string
 
 func (s *stringList) String() string { return strings.Join(*s, ",") }
@@ -272,8 +271,6 @@ func runDefaultProvider(env *env, args []string) error {
 	return nil
 }
 
-// commit validates before writing so a rejected change never reaches disk and
-// never breaks the next `just switch`.
 func commit(env *env, cfg Config) error {
 	if err := cfg.validate(); err != nil {
 		return fmt.Errorf("refusing to write an invalid configuration:\n%w", err)

@@ -48,9 +48,6 @@ func (h *harness) load() Config {
 	return cfg
 }
 
-// `just switch` consumes ensure's stdout as the --override-input path, so it
-// must be the bare directory and nothing else, even on the run that creates
-// the file and logs about it.
 func TestEnsureCreatesConfigAndPrintsOnlyTheDirectory(t *testing.T) {
 	h := newHarness(t)
 
@@ -178,8 +175,6 @@ func TestProviderLifecycleKeepsDefaultProviderValid(t *testing.T) {
 		t.Fatalf("--default should set the default provider, got %q", cfg.defaultProvider())
 	}
 
-	// Removing the default must not leave a dangling alias behind: the next
-	// `just switch` would fail the module assertion instead.
 	h.mustRun("provider", "rm", "corp")
 	cfg = h.load()
 	if len(cfg.providers()) != 0 {

@@ -42,8 +42,6 @@ func TestParseArgsProviderAndRepo(t *testing.T) {
 }
 
 func TestParseArgsRepoAndDest(t *testing.T) {
-	// "team/billing" isn't a known provider alias, so the second argument is
-	// a destination directory, not a provider.
 	sp, err := parseArgs([]string{"team/billing", "/tmp/x"}, testProviders())
 	if err != nil {
 		t.Fatal(err)

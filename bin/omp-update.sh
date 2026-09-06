@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-# Bump the omp package pin: fetch release SHAs and rewrite home/omp.nix.
 set -euo pipefail
 
 if [[ $# -ne 1 ]]; then

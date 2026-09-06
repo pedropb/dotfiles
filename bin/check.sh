@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-# Evaluate the flake and this machine's profile without changing anything.
 set -euo pipefail
 
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
