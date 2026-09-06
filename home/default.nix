@@ -86,6 +86,12 @@ in
   };
 
   config = {
+  warnings = lib.optional (pkgs.stdenv.hostPlatform.system == "x86_64-darwin") ''
+    x86_64-darwin (Intel Mac) support is deprecated: Nixpkgs 26.05 is the
+    final release supporting it, and this profile pins Intel Darwin to that
+    release. Migrate to Apple Silicon when possible.
+  '';
+
   assertions = [
     {
       assertion = clnProviders ? ${config.dotfiles.cln.defaultProvider};
