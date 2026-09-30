@@ -33,9 +33,12 @@
       systems = [ "x86_64-darwin" "aarch64-darwin" "x86_64-linux" "aarch64-linux" ];
 
       isIntelDarwin = system: system == "x86_64-darwin";
-      nixpkgsFor = system: if isIntelDarwin system then nixpkgsIntelDarwin else nixpkgs;
       homeManagerFor = system: if isIntelDarwin system then home-managerIntelDarwin else home-manager;
-      pkgsFor = system: (nixpkgsFor system).legacyPackages.${system};
+
+      pkgsFor = system:
+        if isIntelDarwin system
+        then import nixpkgsIntelDarwin { inherit system; config.allowDeprecatedx86_64Darwin = true; }
+        else nixpkgs.legacyPackages.${system};
 
       forAllSystems = f: lib.genAttrs systems (system: f (pkgsFor system));
 
