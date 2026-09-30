@@ -1,22 +1,22 @@
 { lib, stdenvNoCC, fetchurl }:
 let
-  version = "18.3.2";
+  version = "18.4.4";
   sources = {
     aarch64-darwin = {
       asset = "omp-darwin-arm64";
-      hash = "sha256-n8zyzdekcsk8tU2Z2V2RTIa19BZSBU483QsXxdKDk6Y=";
+      hash = "sha256-524CghJC+zaERnap37efvl+wadk+879iYl7DOf6dCSs=";
     };
     x86_64-darwin = {
       asset = "omp-darwin-x64";
-      hash = "sha256-aV08/T3DEZg2LwvkNE3+ZNzEZV+57zMW2UNorXrylNY=";
+      hash = "sha256-GFQf0Vp3BxlakEG3SPKx1kfzlRStINnEHfUwRCRN6rU=";
     };
     aarch64-linux = {
       asset = "omp-linux-arm64";
-      hash = "sha256-9W9Hdau/JpxIHHh5lpHqpZp9aWRPp9WSx3Xixl97E9o=";
+      hash = "sha256-YC7v3cD9hwQ/jwjYYo1yWS5YAsADoF8gPx7LxjqP3TA=";
     };
     x86_64-linux = {
       asset = "omp-linux-x64";
-      hash = "sha256-jLvNS+p6e4YRahM1LzHjd4/U2T35MQNrsXcXOLBwJTQ=";
+      hash = "sha256-JMgw/OsL1ohL9b8seit0B7wj+v5lXpJMaV75vjCORvM=";
     };
   };
   source = sources.${stdenvNoCC.hostPlatform.system}
