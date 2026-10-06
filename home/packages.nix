@@ -17,6 +17,7 @@ lib.optional stdenv.isDarwin flameshot
   lazygit
   gh
   glab
+  google-cloud-sdk
   tmux
   tree
   (pkgs.callPackage ../tools/cln/package.nix { })
