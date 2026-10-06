@@ -166,7 +166,7 @@ in
       };
 
       profileExtra = ''
-        export PATH="$HOME/.nix-profile/bin:$PATH:$HOME/.local/bin"
+        export PATH="$HOME/.nix-profile/bin:$PATH:$HOME/.local/bin:$HOME/.cargo/bin"
         export BAT_THEME="TwoDark"
       '';
 
