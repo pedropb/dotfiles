@@ -90,6 +90,10 @@ Git identities, credential helpers, and private
 in [`home/local-config.md`](home/local-config.md).
 
 The package inventory is defined in [`home/packages.nix`](home/packages.nix).
+`just sizes` reports the activated profile's total size and attributes it to
+those dependencies, separating each one's exclusive size (what dropping it
+reclaims) from what it shares with the rest of the profile; `just sizes --json`
+emits the same data for further analysis.
 
 ## Git authentication
 

@@ -300,6 +300,65 @@ vim.api.nvim_create_autocmd("TextYankPost", {
   end,
 })
 
+-- [[ Markdown preview ]]
+-- Open the current Markdown file in cmux's native viewer as a separate pane
+-- (live reloads on save, real table/image rendering). Focus stays in Neovim;
+-- switch panes with <C-h>/<C-l>. Only defined inside cmux.
+vim.api.nvim_create_autocmd("FileType", {
+  desc = "Buffer-local cmux Markdown preview keymap",
+  group = vim.api.nvim_create_augroup("kickstart-markdown-preview", { clear = true }),
+  pattern = "markdown",
+  callback = function(event)
+    local buf = event.buf
+
+    vim.keymap.set("n", "<leader>mp", function()
+      local workspace = vim.env.CMUX_WORKSPACE_ID
+      local surface = vim.env.CMUX_SURFACE_ID
+      if not (workspace and surface) then
+        vim.notify("Markdown preview needs Neovim running inside cmux", vim.log.levels.WARN)
+        return
+      end
+
+      local name = vim.api.nvim_buf_get_name(buf)
+      if name == "" then
+        vim.notify("Markdown preview: buffer is not backed by a file", vim.log.levels.WARN)
+        return
+      end
+
+      -- The viewer reads from disk, so flush pending edits first.
+      if vim.bo[buf].modified then
+        local ok, err = pcall(vim.cmd.update)
+        if not ok then
+          vim.notify("Markdown preview: could not save file: " .. err, vim.log.levels.WARN)
+          return
+        end
+      end
+
+      local ok, err = pcall(vim.system, {
+        "cmux",
+        "markdown",
+        "open",
+        vim.fn.fnamemodify(name, ":p"),
+        "--workspace",
+        workspace,
+        "--surface",
+        surface,
+        "--focus",
+        "false",
+      }, { text = true }, function(result)
+        if result.code ~= 0 then
+          vim.schedule(function()
+            vim.notify("Markdown preview failed: " .. (result.stderr ~= "" and result.stderr or result.code), vim.log.levels.ERROR)
+          end)
+        end
+      end)
+      if not ok then
+        vim.notify("Markdown preview failed: " .. err, vim.log.levels.ERROR)
+      end
+    end, { buffer = buf, desc = "[M]arkdown [P]review (cmux)" })
+  end,
+})
+
 -- [[ Install `lazy.nvim` plugin manager ]]
 --    See `:help lazy.nvim.txt` or https://github.com/folke/lazy.nvim for more info
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
@@ -466,6 +525,7 @@ require("lazy").setup({
         { "<leader>s", group = "[S]earch" },
         { "<leader>w", group = "[W]orkspace" },
         { "<leader>t", group = "[T]oggle" },
+        { "<leader>m", group = "[M]arkdown" },
         { "<leader>h", group = "Git [H]unk" },
         { "<leader>h", desc = "Git [H]unk", mode = "v" },
       })

@@ -53,6 +53,13 @@
         modules = [ ./home/default.nix ];
       };
 
+      # The dependency inventory this repo declares, evaluated against the same
+      # pkgs the profile is built from. `packages` can only hold derivations, so
+      # it lives here; bin/profile-size.sh reads it to attribute profile size.
+      legacyPackages = forAllSystems (pkgs: {
+        repoPackages = import ./home/packages.nix { inherit pkgs; };
+      });
+
       packages = forAllSystems (pkgs: {
         inherit (pkgs) home-manager;
         dotfiles-local = pkgs.callPackage ./tools/dotfiles-local/package.nix { };

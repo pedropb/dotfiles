@@ -19,6 +19,11 @@ bootstrap:
 local:
   nix run .#dotfiles-local -- show
 
+# Report the profile's size, attributed to the dependencies in home/packages.nix.
+# Flags pass through to the script: just sizes --json
+sizes *args:
+  ./bin/profile-size.sh {{args}}
+
 # Run cln's test suite.
 test-cln:
   cd tools/cln && go test ./...
