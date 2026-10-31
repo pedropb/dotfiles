@@ -199,7 +199,7 @@ in
     );
     "git/personal".source = ../config/git/personal;
     "wezterm/wezterm.lua".source = ../config/wezterm/wezterm.lua;
-    "cmux/cmux.json".source = ../config/cmux/cmux.json;
+    "rex/init.lua".source = ../config/rex/init.lua;
     "ghostty/config".source = ../config/ghostty/config;
     "cln/config.toml".source = (pkgs.formats.toml { }).generate "cln-config.toml" (
       { default_provider = config.dotfiles.cln.defaultProvider; }
